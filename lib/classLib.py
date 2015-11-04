@@ -269,7 +269,8 @@ class analysisDatas(object):
     def saveAnalysisData(self, scanDate, scanName):
         
         path = os.getcwd() + "/Datas/"             
-        pathname2 = "Raw_calibrated_datas/"
+        pathname2 = "current/"
+        pathname3 = "other"
         
         if not os.path.exists(path):
             os.makedirs(path)
@@ -277,22 +278,23 @@ class analysisDatas(object):
         if not os.path.exists(path + scanDate + "/" + scanName + "/" + pathname2):
             os.makedirs(path + scanDate + "/" + scanName + "/" + pathname2)
             
-        savingPath = path + scanDate + "/" + scanName + "/" + pathname2 + "/"
+        if not os.path.exists(path + scanDate + "/" + scanName + "/" + pathname3):
+            os.makedirs(path + scanDate + "/" + scanName + "/" + pathname3)
+            
+        savingPath1 = path + scanDate + "/" + scanName + "/" + pathname2 + "/"
+        savingPath2 = path + scanDate + "/" + scanName + "/" + pathname3 + "/"
         
-        np.save(savingPath + "energy", self.xaxisCalib)
-        np.savetxt(savingPath + "energy.txt", self.xaxisCalib)
-        np.save(savingPath + "time", self.taxis)
-        np.savetxt(savingPath + "time.txt", self.taxis)
+        np.savetxt(savingPath1 + "energy.txt", self.energy)
+        np.savetxt(savingPath1 + "time.txt", self.taxis)
+        np.savetxt(savingPath2 + "energy.txt", self.energy)
+        np.savetxt(savingPath2 + "time.txt", self.taxis)
         
+        np.savetxt(savingPath1 + "currentScan.txt", self.display)
         
-        if self.refState == 0:
-            np.save(savingPath + "imScan", self.imNoRefCrop)
-            np.savetxt(savingPath + "imScan.txt", self.imNoRefCrop)
-        elif self.refState == 2:
-            np.save(savingPath + "imScan", self.imScanCrop)
-            np.savetxt(savingPath + "imScan.txt", self.imScanCrop)
-            np.save(savingPath + "imRef", self.imRefCrop)
-            np.savetxt(savingPath + "imRef.txt", self.imRefCrop)
+        for key, value in self.itemDict.iteritems():
+            if np.size(value)>1:
+                np.savetxt(savingPath2 + str(key) + ".txt", value)
+            
         
         
         

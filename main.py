@@ -469,6 +469,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.initSmoothPreview()
         self.initMovingCancelButton()
         self.initMovingApplyButton()
+        self.initSavingEdit()
+        self.initSaveButton()
             
     ##### Graph initialization   
     def initAnalysisGraph(self):
@@ -603,6 +605,12 @@ class Main(QMainWindow, Ui_MainWindow):
     def initMovingApplyButton(self):
         self.movingApp.clicked.connect(self.updateNormApp)   
         
+    def initSavingEdit(self):
+        self.dateEdit.setText("Enter date")
+        self.nameEdit.setText("Enter scan name")
+        
+    def initSaveButton(self):   
+        self.saveButton.clicked.connect(self.onpressSaveButton) 
         
         
         
@@ -695,6 +703,10 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.movingAverage()
         self.updateAnalysisGraph()
         
+    def onpressSaveButton(self):
+        scanDate = str(self.dateEdit.text())
+        scanName = str(self.nameEdit.text())
+        self.AObj.saveAnalysisData(scanDate, scanName)
         
         
         
