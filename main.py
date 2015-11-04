@@ -637,11 +637,11 @@ class Main(QMainWindow, Ui_MainWindow):
         
     def _onpressrefStore(self):
         self.refbox.addItem("Processed ref " + str(self.AObj.noProcessedScan))
-        self.AObj.storeProcessedToScan()
+        self.AObj.storeProcessedToRef()
         
     def _onpressnormStore(self):
         self.normbox.addItem("Processed norm " + str(self.AObj.noProcessedScan))
-        self.AObj.storeProcessedToScan()
+        self.AObj.storeProcessedToNorm()
         
     def updateNormPreview(self):
         self.AObj.normalization()
