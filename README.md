@@ -1,5 +1,5 @@
 # Geneva-analysis
-** This software is highly beta version so many improvements have to be made **
+**This software is highly beta version so many improvements have to be made**
 
 This software is a graphical interface built with pyqt4. All plots are done with the pyqt4 interface of matplotlib.
 
