@@ -89,7 +89,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         self.folderName = str(QFileDialog.getExistingDirectory(
                               self, 'Select folder'))
-        
+
         # Creation of scan object and range for image display (specific to each scan)                  
         self.initScanObject()
         
@@ -667,6 +667,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.updateAnalysisGraph()
         
     def updateRefApp(self):
+        self.AObj.display = self.AObj.displaytemp
         self.refbox.addItem("Processed ref " + str(self.AObj.noProcessedRef))
         index = self.refbox.findText("Processed ref " + str(self.AObj.noProcessedRef))
         self.AObj.storeProcessedToRef()
