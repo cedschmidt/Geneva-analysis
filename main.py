@@ -40,6 +40,7 @@ class Main(QMainWindow, Ui_MainWindow):
         #Initiate main window
         super(Main, self).__init__()
         self.setupUi(self)
+        self.isDirectlyClose = False
         
         #Menu creation
         self.create_menu()
@@ -60,8 +61,29 @@ class Main(QMainWindow, Ui_MainWindow):
             #Image for 2d analysis
         self.figAnalysis = Figure(facecolor='1')
         self.canvasAnalysis = FigureCanvas(self.figAnalysis)
+        
+    def close (self):
+        for childQWidget in self.findChildren(QWidget):
+            childQWidget.close()
+        self.isDirectlyClose = True
+        return QMainWindow.close(self)
 
+    def closeEvent (self, eventQCloseEvent):
+        if self.isDirectlyClose:
+            eventQCloseEvent.accept()
+        else:
+            answer = QMessageBox.question (
+                self,
+                'Quit',
+                'Are you sure you want to quit ?',
+                QMessageBox.Yes,
+                QMessageBox.No)
+            if (answer == QMessageBox.Yes) or (self.isDirectlyClose == True):
+                eventQCloseEvent.accept()
+            else:
+                eventQCloseEvent.ignore()
 
+ 
     def create_menu(self):
         '''
         This function will create all the menu entrance and connect them to the
@@ -636,11 +658,11 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.storeProcessedToScan()
         
     def _onpressrefStore(self):
-        self.refbox.addItem("Processed ref " + str(self.AObj.noProcessedScan))
+        self.refbox.addItem("Processed ref " + str(self.AObj.noProcessedRef))
         self.AObj.storeProcessedToRef()
         
     def _onpressnormStore(self):
-        self.normbox.addItem("Processed norm " + str(self.AObj.noProcessedScan))
+        self.normbox.addItem("Processed norm " + str(self.AObj.noProcessedNorm))
         self.AObj.storeProcessedToNorm()
         
     def updateNormPreview(self):
