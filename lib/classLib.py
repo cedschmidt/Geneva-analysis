@@ -3,15 +3,13 @@
 from __future__ import division
 from __future__ import print_function
 
-
+import os
+import glob
 import numpy as np
 from scipy.misc import imread
 from scipy.optimize import curve_fit
-import sys
-import os
-import datetime as dtt
-import time
-import glob
+
+
 from progressbar import ProgressBar, Percentage, Bar
 from funLib import *
 
@@ -30,9 +28,9 @@ class scanData(object):
         self.rectSpec = np.zeros(4, int)
         
         self.wavelRef = np.zeros(3, float)
-        self.specRef = np.zeros(3, int)
+        self.specRef = np.array([0, 20, 50], int)
         
-        self.t0Ref = 50
+        self.t0Ref = 35
         self.deltat = -20
 
         
@@ -101,10 +99,10 @@ class scanData(object):
         
         
         if (self.specRef[0]<self.rect[2]) | (self.specRef[0]>self.rect[3]):
-            self.specRef[0] = self.rect[2] + 5
+            self.specRef[0] = self.rect[2] + 10
             
         if (self.specRef[2]<self.rect[2]) | (self.specRef[2]>self.rect[3]):
-            self.specRef[2] = self.rect[3] - 5
+            self.specRef[2] = self.rect[3] - 10
             
         if (self.specRef[1]<self.rect[2]) | (self.specRef[1]>self.rect[3]):
             self.specRef[1] = int(0.5*(self.specRef[0] + self.specRef[2]))
@@ -179,25 +177,29 @@ class scanData(object):
     
 class analysisDatas(object):
     def __init__(self, *args):
-        
         self.taxis = args[0]
         self.energy = args[1]
         
-        if len(args) == 3:            
-            self.scanInit = args[2]
-            self.scan = args[2]
-            self.refInit = 0.
-            self.ref = 0.
-            self.normInit = 1.
-            self.norm = 1.
-
-        elif len(args) == 4:
-            self.scanInit = args[2]
-            self.scan = args[2]
-            self.refInit = args[3]
-            self.ref = args[3]
-            self.normInit = args[2]
-            self.norm = args[2]
+        try:
+            if len(args) == 3:
+                self.scanInit = args[2]
+                self.scan = args[2]
+                self.refInit = 0.
+                self.ref = 0.
+                self.normInit = 1.
+                self.norm = 1.
+                self.background = args[2]
+    
+            elif len(args) == 4:
+                self.scanInit = args[2]
+                self.scan = args[2]
+                self.refInit = args[3]
+                self.ref = args[3]
+                self.normInit = args[2]
+                self.norm = args[2]
+                self.background = args[2]
+        except:
+            print("Analysis parameters are wrong")
             
         self.itemDict = {"Raw Scan":self.scanInit, "Raw ref":self.refInit, \
         "Raw norm":self.normInit, "1":1., "0":0.}
@@ -206,13 +208,14 @@ class analysisDatas(object):
         
         self.noProcessedScan = 0
         self.noProcessedRef = 0
-        self.noProcessedNorm = 0   
+        self.noProcessedNorm = 0  
+        self.noBackground = 0
         
-        self.lowerBoundNorm = 0
-        self.upperBoundNorm = 0
+        self.lowerBoundNorm = np.amin(self.energy) + 10
+        self.upperBoundNorm = np.amax(self.energy) - 10
         
-        self.lowerBoundRef = 0
-        self.upperBoundRef = 0
+        self.lowerBoundRef = np.amin(self.taxis) + 30
+        self.upperBoundRef = np.amax(self.taxis) - 30
         
         self.axisSmoothList = {"Time":0, "Energy":1}
         self.axisSmoothCurrent = 0
@@ -227,27 +230,36 @@ class analysisDatas(object):
         axis = self.axisSmoothCurrent
         windowLen = self.windowLen
         windowType = self.windowType
-        self.displaytemp = movingSmooth(self.display, axis, windowLen, windowType)
+        
+        if axis == 0:
+            self.displaytemp = movingSmooth(self.display, axis, windowLen, windowType)
+        elif axis == 1:
+            self.background = movingSmooth(self.display, axis, windowLen, windowType)
+            self.displaytemp = -(self.display - self.background)
         
     def normalization(self):
-        lmin = np.amin([self.lowerBoundNorm, self.upperBoundNorm])
-        lmax = np.amax([self.lowerBoundNorm, self.upperBoundNorm])
-        sumRef = np.sum(self.display[:, lmin:lmax], axis = 1)
+        lmin = np.argmin(np.abs(self.energy - self.lowerBoundNorm))
+        lmax = np.argmin(np.abs(self.energy - self.upperBoundNorm))
+        sumRef = np.sum(self.display[:, np.amin([lmin, lmax]):np.amax([lmin, lmax])], axis = 1)
         
         for idx in range(len(sumRef)):
             self.displaytemp[idx, :] = self.display[idx, :]/sumRef[idx]
             
     def createRef(self):
-        lmin = np.amin([self.lowerBoundRef, self.upperBoundRef])
-        lmax = np.amax([self.lowerBoundRef, self.upperBoundRef])
-        refmean = np.mean(self.display[int(lmin):int(lmax), :], axis = 0)
+        lmin = np.argmin(np.abs(self.taxis - self.lowerBoundRef))
+        lmax = np.argmin(np.abs(self.taxis - self.upperBoundRef))
+        refmean = np.mean(self.display[np.amin([lmin, lmax]):np.amax([lmin, lmax]), :], axis = 0)
         
         self.ref = np.zeros_like(self.display)
         
         for i in range(len(self.taxis)):
             self.ref[i, :] = refmean
         
-        self.displaytemp = self.display - self.ref        
+        self.displaytemp = self.display - self.ref  
+        
+    def getPeaks(self, lam, p, niter=10):
+        self.background = peakExtract(-self.display, lam, p, niter)
+        self.displaytemp = -(self.display - self.background)
         
     def validateChange(self):
         self.display = self.displaytemp
@@ -265,6 +277,12 @@ class analysisDatas(object):
         norm = self.display
         self.itemDict.update({"Processed norm " + str(self.noProcessedNorm):norm})
         self.noProcessedNorm += 1
+        
+    def storeToBack(self):
+        back = self.background
+        self.itemDict.update({"Background " + str(self.noBackground):back})
+        self.noBackground += 1
+
         
     def saveAnalysisData(self, scanDate, scanName):
         

@@ -11,18 +11,18 @@ Created on Tue Aug 25 15:37:48 2015
 from __future__ import division, print_function
 import numpy as np
 
-import sys
-from PyQt4.uic import loadUiType
+import sys, gc
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4.uic import loadUiType
+
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-    
 
 from lib.classLib import scanData, analysisDatas
-from lib.funLib import RectangleSelector
+from lib.funLib import  DraggableVLine, DraggableHLine, RectangleSelector
+
 
 Ui_MainWindow, QMainWindow = loadUiType('gui_layout/lh_gui.ui')
 
@@ -33,34 +33,68 @@ Ui_MainWindow, QMainWindow = loadUiType('gui_layout/lh_gui.ui')
 class Main(QMainWindow, Ui_MainWindow):
 
 ###########################    Initlization part    ###########################
-    def __init__(self):
+    def __init__(self, foldername = None):
         '''
         Initialization of main window
         '''
-        #Initiate main window
-        super(Main, self).__init__()
-        self.setupUi(self)
-        self.isDirectlyClose = False
-        
-        #Menu creation
-        self.create_menu()
-        
-        #Creation of figures
-            #Images for area selection and image scrolling
-        self.fig2d = Figure(facecolor='1')
-        self.canvas2d = FigureCanvas(self.fig2d)
-            #Spectra over selection
-        self.fig1dSpec = Figure(facecolor='1')
-        self.canvas1dSpec = FigureCanvas(self.fig1dSpec)
-            # Spectrum for wavelength calibration
-        self.fig1dSpecCalib = Figure(facecolor='1')
-        self.canvas1dSpecCalib = FigureCanvas(self.fig1dSpecCalib)
-            #Image for 2d scan (spectrum vs time)
-        self.fig2dScan = Figure(facecolor='1')
-        self.canvas2dScan = FigureCanvas(self.fig2dScan)
-            #Image for 2d analysis
-        self.figAnalysis = Figure(facecolor='1')
-        self.canvasAnalysis = FigureCanvas(self.figAnalysis)
+        if foldername == None:
+            #Initiate main window
+            super(Main, self).__init__()
+            self.setupUi(self)
+            self.isDirectlyClose = False
+            
+            #Menu creation
+            self.create_menu()
+            
+            #Creation of figures
+                #Images for area selection and image scrolling
+            self.fig2d = Figure(facecolor='1')
+            self.canvas2d = FigureCanvas(self.fig2d)
+                
+                # Spectrum for wavelength calibration
+            self.fig1dSpecCalib = Figure(facecolor='1')
+            self.canvas1dSpecCalib = FigureCanvas(self.fig1dSpecCalib)
+                #Image for 2d scan (spectrum vs time)
+            self.fig2dScan = Figure(facecolor='1')
+            self.canvas2dScan = FigureCanvas(self.fig2dScan)
+                #Image for 2d analysis
+            self.figAnalysis = Figure(facecolor='1')
+            self.canvasAnalysis = FigureCanvas(self.figAnalysis)
+                #Figure for 1d background baseline
+            self.figBackBaseline = Figure(facecolor='1')
+            self.canvasBackBaseline = FigureCanvas(self.figBackBaseline)
+        else:
+            #Initiate main window
+            self.setupUi(self)
+            
+            gc.collect()
+            self.isDirectlyClose = False
+            
+            #Creation of figures
+                #Images for area selection and image scrolling
+            self.fig2d = Figure(facecolor='1')
+            self.canvas2d = FigureCanvas(self.fig2d)
+                
+                # Spectrum for wavelength calibration
+            self.fig1dSpecCalib = Figure(facecolor='1')
+            self.canvas1dSpecCalib = FigureCanvas(self.fig1dSpecCalib)
+                #Image for 2d scan (spectrum vs time)
+            self.fig2dScan = Figure(facecolor='1')
+            self.canvas2dScan = FigureCanvas(self.fig2dScan)
+                #Image for 2d analysis
+            self.figAnalysis = Figure(facecolor='1')
+            self.canvasAnalysis = FigureCanvas(self.figAnalysis)
+                #Figure for 1d background baseline
+            self.figBackBaseline = Figure(facecolor='1')
+            self.canvasBackBaseline = FigureCanvas(self.figBackBaseline)
+            
+            # Creation of scan object and range for image display (specific to each scan)                  
+            self.initScanObject(foldername)
+            
+            # Initilization of widgets related to the Calibration scan object 
+            self.initCalibrationTab()
+            self.tabWidget.setCurrentIndex(0)
+            
         
     def close (self):
         for childQWidget in self.findChildren(QWidget):
@@ -109,25 +143,25 @@ class Main(QMainWindow, Ui_MainWindow):
         This function is connected to the 'Select folder' menu entrance. It will
         create a scan object which will be used for all the calibration.
         '''
-        self.folderName = str(QFileDialog.getExistingDirectory(
+        foldername = str(QFileDialog.getExistingDirectory(
                               self, 'Select folder'))
+                              
+        self.__init__(foldername)
 
-        # Creation of scan object and range for image display (specific to each scan)                  
-        self.initScanObject()
-        
-        # Initilization of widgets related to the Calibration scan object 
-        self.initCalibrationTab()
+#        # Creation of scan object and range for image display (specific to each scan)                  
+#        self.initScanObject()
+#        
+#        # Initilization of widgets related to the Calibration scan object 
+#        self.initCalibrationTab()
     
         
 ################################   Calibration tab ############################
         
     def initCalibrationTab(self):
+        print("test2")
         self.initSliderH()
         self.initSliderV()
-        self.initSliderCalib()
-        self.initt0Slider()
         self.plot2d()
-        self.plot1dSpec()
         self.plotCalibSpec()
         self.plot2dScan()
         self.initButton()
@@ -139,11 +173,14 @@ class Main(QMainWindow, Ui_MainWindow):
         self.initdeltatText()
         self.initSaveScan()
         
-    def initScanObject(self):
-        self.lhObj = scanData(self.folderName)
+    def initScanObject(self, folderName):
+        self.lhObj = scanData(folderName)
         self.vmin = np.amin(self.lhObj.imStackscanTot)
         self.vmax = np.amax(self.lhObj.imStackscanTot)
         self.imNumber.setText(str(self.lhObj.currentImNum)+'/'+ str(self.lhObj.noImage))
+
+
+######################################################## Overview and selection
 
     def plot2d(self):
         '''
@@ -159,120 +196,18 @@ class Main(QMainWindow, Ui_MainWindow):
                                        vmin=self.vmin,
                                        vmax=self.vmax)
 
-        self.rect = RectangleSelector(self.axes2d, self._on_mouse_release,
-                                      [0, 100, 0, 100], useblit=True)
+        self.rect = RectangleSelector(self.axes2d, self._on_mouse_release, useblit = True)
+                                      
+
         self.axes2d.set_xlabel('Pixel number')
         self.axes2d.set_ylabel('Pixel number')
         self.canvas2d.draw()
         self.mpl2dIm.addWidget(self.canvas2d)
-
-    def plot1dSpec(self):
-        '''
-        Initialization of 1d plot of instantaneous spectrum according rectangle
-        selection on image graph.
-        '''
-        self.fig1dSpec.clear()
-        self.axes1dSpec = self.fig1dSpec.add_subplot(111)
-
-        self.im1dSpec = self.axes1dSpec.plot(np.mean(self.lhObj.Im1dSpec,
-                                                     axis=0))
-        self.canvas1dSpec.draw()
-        self.mpl1dSpec.addWidget(self.canvas1dSpec)
         
-    def plotCalibSpec(self):
-        '''
-        Initialization of 1d plot of calibration spectrum with cropped images
-        '''
-        self.fig1dSpecCalib.clear()
-        self.axes1dSpecCalib = self.fig1dSpecCalib.add_subplot(111)
-
-        self.im1dSpecCalib = self.axes1dSpecCalib.plot(self.lhObj.xaxisCalib, \
-        self.lhObj.spectrumMean)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[0], color = 'red', linewidth = 2)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[1], color = 'blue', linewidth = 2)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[2], color = 'green', linewidth = 2)
-        
-        self.canvas1dSpecCalib.draw()
-        self.mplSpecCalib.addWidget(self.canvas1dSpecCalib)
-        
-    def plot2dScan(self):
-        '''
-        Once the folder has been selected and scan object created, this function 
-        initiate the display of the 2d images containing all the images of the
-        scan
-        '''
-        self.fig2dScan.clear()
-        self.axes2dScan = self.fig2dScan.add_subplot(111)
-        
-        self.im2dScan = self.axes2dScan.pcolormesh(self.lhObj.xaxisCalib,
-                                               self.lhObj.taxis,                                                                              
-                                               np.transpose(self.lhObj.imNoRefCrop))
-                                               
-        self.axes2dScan.axhline(self.lhObj.t0Ref, color = 'white', linewidth = 2)
-
-        self.axes2dScan.set_xlabel('Photon Energy')
-        self.axes2dScan.set_ylabel('Time')
-        self.canvas2dScan.draw()
-        self.scanRaw.addWidget(self.canvas2dScan)
-
-    def initButton(self):
-        self.imCrop.clicked.connect(self._onpressButtonCrop)
-        self.imInit.clicked.connect(self._onpressButtonInit)
-        self.push_calib.clicked.connect(self._onpressCalib)
-
-    def initSliderH(self):
-        self.imSlider.setMaximum(self.lhObj.noImage-1)
-        self.imSlider.valueChanged[int].connect(self.changeImage)
-
-    def initSliderV(self):
-        self.colorSlider.setMinimum(np.amin(self.lhObj.currentIm))
-        self.colorSlider.setMaximum(np.amax(self.lhObj.currentIm))
-        self.colorSlider.valueChanged[int].connect(self.changeColor)
-        
-    def initSliderCalib(self):
-        self.setSliderLim()
-        self.ref1_slider.valueChanged[int].connect(self.moveRef1)        
-        self.ref2_slider.valueChanged[int].connect(self.moveRef2)
-        self.ref3_slider.valueChanged[int].connect(self.moveRef3)
-        
-    def initt0Slider(self):
-        self.sett0SliderLim()
-        self.t0_slider.valueChanged[int].connect(self.movet0Ref)
-        
-    def initRefText(self):
-        self.ref1.setText("196.2")
-        self.ref1.returnPressed.connect(self.readRef1)
-        
-        self.ref2.setText("184")
-        self.ref2.returnPressed.connect(self.readRef2)
-        
-        self.ref3.setText("173")
-        self.ref3.returnPressed.connect(self.readRef3)
-        
-    def initdeltatText(self):
-        self.deltat.setText("-20")
-        self.deltat.returnPressed.connect(self.readDeltat)
-        
-    def initCheckRef(self):
-        self.ref_onoff.stateChanged.connect(self.updateRef)
-        
-    def initCheckSub(self):
-        self.ref_substract.stateChanged.connect(self.substractRef)
-        
-    def initCheckScanUpdate(self):
-        self.updateGraph.clicked.connect(self._onpressScanUpdate)
-        
-    def initSaveScan(self):
-        self.saveScan.clicked.connect(self._onpressSaveScan)
-
-    ################     Updating graph   
-
-        ########### 2d image
     def changeImage(self, value):
         self.lhObj.currentImNum = value
         self.lhObj.changeCurrentIm(value)
         self.updateImage2d()
-        self.updateImage1dSpec()
         self.imNumber.setText(str(self.lhObj.currentImNum)+'/'+ str(self.lhObj.noImage))
 
     def updateImage2d(self):
@@ -290,15 +225,67 @@ class Main(QMainWindow, Ui_MainWindow):
         self.canvas2d.draw()
         self.rect.update()
         
-        ######### 1D spectrum for scrolling
+    def initButton(self):
+        self.imCrop.clicked.connect(self._onpressButtonCrop)
+        self.imInit.clicked.connect(self._onpressButtonInit)
+        self.push_calib.clicked.connect(self._onpressCalib)
 
-    def updateImage1dSpec(self):
-        self.axes1dSpec.cla()
-        self.im1dSpec = self.axes1dSpec.plot(np.mean(self.lhObj.Im1dSpec,
-                                                     axis=0))
-        self.canvas1dSpec.draw()
+    def initSliderH(self):
+        self.imSlider.setMaximum(self.lhObj.noImage-1)
+        self.imSlider.valueChanged[int].connect(self.changeImage)
+
+    def initSliderV(self):
+        self.colorSlider.setMinimum(np.amin(self.lhObj.currentIm))
+        self.colorSlider.setMaximum(np.amax(self.lhObj.currentIm))
+        self.colorSlider.valueChanged[int].connect(self.changeColor)  
         
-        ########## 1D spectrum for calibration
+    def _on_mouse_release(self, epress=None, erelease=None):
+        x0, y0, width, height = self.rect._rect_bbox
+        self.lhObj.rectSpec = [y0 + self.lhObj.rect[0], 
+                                   self.lhObj.rect[0] + y0 + height,
+                                   self.lhObj.rect[2] + x0,
+                                   self.lhObj.rect[2] + x0 + width]
+        
+    def _onpressButtonCrop(self):
+        x0, y0, width, height = np.int64(self.rect._rect_bbox)
+        self.lhObj.rect = [y0 + self.lhObj.rect[0], self.lhObj.rect[0] + y0 +
+                           height, self.lhObj.rect[2] + x0,
+                           self.lhObj.rect[2] + x0 + width]
+
+        self.lhObj.cropIm()
+        self.updateImage2d() 
+        self.updatePlotCalibSpec()
+        self.updatePlot2dScan()
+
+    def _onpressButtonInit(self):
+        self.lhObj.rect = [0, self.lhObj.imSizeInit[0]-1, 0, self.lhObj.imSizeInit[1]-1]
+        self.lhObj.rectSpec = [0, self.lhObj.imSizeInit[0]-1, 0, self.lhObj.imSizeInit[1]-1]
+        
+        self.lhObj.changeCurrentIm(self.lhObj.currentImNum)
+        self.updateImage2d()
+        
+        
+    
+######################################################## Wavelength calib box
+        
+        
+    def plotCalibSpec(self):
+        '''
+        Initialization of 1d plot of calibration spectrum with cropped images
+        '''
+        self.fig1dSpecCalib.clear()
+        self.axes1dSpecCalib = self.fig1dSpecCalib.add_subplot(111)
+
+        self.im1dSpecCalib = self.axes1dSpecCalib.plot(self.lhObj.xaxisCalib, \
+        self.lhObj.spectrumMean)
+        self.line1 = DraggableVLine(self.moveRef1, self.axes1dSpecCalib, self.canvas1dSpecCalib, self.lhObj.specRef[0], colorV = 'red')
+        self.line2 = DraggableVLine(self.moveRef2,self.axes1dSpecCalib, self.canvas1dSpecCalib, self.lhObj.specRef[1], colorV = 'blue')
+        self.line3 = DraggableVLine(self.moveRef3,self.axes1dSpecCalib, self.canvas1dSpecCalib, self.lhObj.specRef[2], colorV = 'green')
+        
+        self.canvas1dSpecCalib.draw()
+        self.mplSpecCalib.addWidget(self.canvas1dSpecCalib)
+        
+    ########## 1D spectrum for calibration
         
     def updatePlotCalibSpec(self):
         
@@ -306,9 +293,9 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.im1dSpecCalib = self.axes1dSpecCalib.plot(self.lhObj.xaxisCalib, \
         self.lhObj.spectrumMean)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[0], color = 'red', linewidth = 2)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[1], color = 'blue', linewidth = 2)
-        self.axes1dSpecCalib.axvline(self.lhObj.specRef[2], color = 'green', linewidth = 2)
+        self.line1.update(self.lhObj.specRef[0])
+        self.line2.update(self.lhObj.specRef[1])
+        self.line3.update(self.lhObj.specRef[2])
         
         self.axes2d.set_xlabel('Photon energy in eV')
         self.axes2d.set_ylabel('Intensity')
@@ -317,29 +304,91 @@ class Main(QMainWindow, Ui_MainWindow):
         
     def moveRef1(self, value):
         self.lhObj.specRef[0] = value*(self.lhObj.xaxisCalib[1] - self.lhObj.xaxisCalib[0])
-        self.updatePlotCalibSpec()
         
     def moveRef2(self, value):
         self.lhObj.specRef[1] = value*(self.lhObj.xaxisCalib[1] - self.lhObj.xaxisCalib[0])
-        self.updatePlotCalibSpec()
         
     def moveRef3(self, value):
         self.lhObj.specRef[2] = value*(self.lhObj.xaxisCalib[1] - self.lhObj.xaxisCalib[0])
+           
+    def initRefText(self):
+        self.ref1.setText("196.2")
+        self.ref1.returnPressed.connect(self.readRef1)
+        
+        self.ref2.setText("184")
+        self.ref2.returnPressed.connect(self.readRef2)
+        
+        self.ref3.setText("173")
+        self.ref3.returnPressed.connect(self.readRef3)
+        
+    def readRef1(self):
+        self.lhObj.wavelRef[0] = float(self.ref1.text())
+        
+    def readRef2(self):
+        self.lhObj.wavelRef[1] = float(self.ref2.text())
+        
+    def readRef3(self):
+        self.lhObj.wavelRef[2] = float(self.ref3.text())
+        
+    def _onpressCalib(self):
+        self.readRef1()
+        self.readRef2()
+        self.readRef3()
+        self.lhObj.specCalibrate()
+        self.lhObj.specRef[0] = float(self.ref1.text())
+        self.lhObj.specRef[1] = float(self.ref2.text())
+        self.lhObj.specRef[2] = float(self.ref3.text())
+        
         self.updatePlotCalibSpec()
+        self.updatePlot2dScan()
         
-    def setSliderLim(self):
-        xmin = int(np.amin(self.lhObj.xaxisCalib)/(self.lhObj.xaxisCalib[1] - self.lhObj.xaxisCalib[0]))
-        xmax = int(np.amax(self.lhObj.xaxisCalib)/(self.lhObj.xaxisCalib[1] - self.lhObj.xaxisCalib[0]))
-        self.ref1_slider.setMinimum(xmin)
-        self.ref1_slider.setMaximum(xmax)
         
-        self.ref2_slider.setMinimum(xmin)
-        self.ref2_slider.setMaximum(xmax)
         
-        self.ref3_slider.setMinimum(xmin)
-        self.ref3_slider.setMaximum(xmax)
         
-        ######### 2D image for Scan
+######################################################## time calibration
+
+        
+    def plot2dScan(self):
+        '''
+        Once the folder has been selected and scan object created, this function 
+        initiate the display of the 2d images containing all the images of the
+        scan
+        '''
+        self.fig2dScan.clear()
+        self.axes2dScan = self.fig2dScan.add_subplot(111)
+        
+        self.im2dScan = self.axes2dScan.pcolormesh(self.lhObj.xaxisCalib,
+                                               self.lhObj.taxis,                                                                              
+                                               np.transpose(self.lhObj.imNoRefCrop))
+                                               
+        self.linet0 = DraggableHLine(self.movet0Ref, self.axes2dScan, self.canvas2dScan, self.lhObj.t0Ref, colorH = 'white')
+                                              
+        self.axes2dScan.set_xlabel('Photon Energy')
+        self.axes2dScan.set_ylabel('Time')
+        self.canvas2dScan.draw()
+        self.scanRaw.addWidget(self.canvas2dScan)
+
+
+    def initdeltatText(self):
+        self.deltat.setText("-20")
+        self.deltat.returnPressed.connect(self.readDeltat)
+        
+    def initCheckRef(self):
+        self.ref_onoff.stateChanged.connect(self.updateRef)
+        
+    def initCheckSub(self):
+        self.ref_substract.stateChanged.connect(self.substractRef)
+        
+    def initCheckScanUpdate(self):
+        self.updateGraph.clicked.connect(self._onpressScanUpdate)
+        
+    def initSaveScan(self):
+        self.saveScan.clicked.connect(self._onpressSaveScan)
+        
+    def _onpressSaveScan(self):
+        self.initAnalysis()      
+        
+    ######### 2D image for Scan
     def updatePlot2dScan(self):
         '''
         Once the folder has been selected and scan object created, this function 
@@ -352,8 +401,8 @@ class Main(QMainWindow, Ui_MainWindow):
                                                self.lhObj.taxis,                                                                              
                                                np.transpose(self.lhObj.imScanCurrent))
                                                
-        self.axes2dScan.axhline(self.lhObj.t0Ref, color = 'white', linewidth = 2)
-
+        self.linet0.update(self.lhObj.t0Ref)
+                                               
         self.axes2dScan.set_xlabel('Photon Energy')
         self.axes2dScan.set_ylabel('Time')
         self.canvas2dScan.draw()
@@ -378,60 +427,11 @@ class Main(QMainWindow, Ui_MainWindow):
                     
         self.updatePlot2dScan()
         
-    def sett0SliderLim(self):
-        tmin = int(np.amin(self.lhObj.taxis))
-        tmax = int(np.amax(self.lhObj.taxis))
-
-        
-        self.t0_slider.setMinimum(tmin)
-        self.t0_slider.setMaximum(tmax)
-        
     def movet0Ref(self, value):
         self.lhObj.t0Ref = value
-        self.updatePlot2dScan()
-
-    ####### Widget interaction
-
-    def _on_mouse_release(self, epress=None, erelease=None):
-        x0, y0, width, height = self.rect._rect_bbox
-        self.lhObj.rectSpec = [y0 + self.lhObj.rect[0],
-                                   self.lhObj.rect[0] + y0 + height,
-                                   self.lhObj.rect[2] + x0,
-                                   self.lhObj.rect[2] + x0 + width]
-        self.lhObj.cropIm1dSpec()
-        self.updateImage1dSpec()
-
-    def _onpressButtonCrop(self):
-        x0, y0, width, height = np.int64(self.rect._rect_bbox)
-        self.lhObj.rect = [y0 + self.lhObj.rect[0], self.lhObj.rect[0] + y0 +
-                           height, self.lhObj.rect[2] + x0,
-                           self.lhObj.rect[2] + x0 + width]
-
-        self.lhObj.cropIm()
-        self.updateImage2d() 
-        self.setSliderLim()       
-        self.updatePlotCalibSpec()
-        self.updatePlot2dScan()
-
-    def _onpressButtonInit(self):
-        self.lhObj.rect = [0, self.lhObj.imSizeInit[0]-1, 0, self.lhObj.imSizeInit[1]-1]
-        self.lhObj.rectSpec = [0, self.lhObj.imSizeInit[0]-1, 0, self.lhObj.imSizeInit[1]-1]
         
-        self.lhObj.changeCurrentIm(self.lhObj.currentImNum)
-        self.updateImage2d()
-        self.updateImage1dSpec()
-        
-    def _onpressCalib(self):
-        self.readRef1()
-        self.readRef2()
-        self.readRef3()
-        self.lhObj.specCalibrate()
-        self.lhObj.specRef[0] = float(self.ref1.text())
-        self.lhObj.specRef[1] = float(self.ref2.text())
-        self.lhObj.specRef[2] = float(self.ref3.text())
-        
-        self.updatePlotCalibSpec()
-        self.updatePlot2dScan()
+    def readDeltat(self):
+        self.lhObj.deltat = float(self.deltat.text())
         
     def _onpressScanUpdate(self):
         self.readDeltat()
@@ -443,58 +443,94 @@ class Main(QMainWindow, Ui_MainWindow):
             
         self.firstCheck = 0
         self.lhObj.t0Ref = 0
-        self.sett0SliderLim()
         self.updatePlot2dScan()
+      
         
-    def _onpressSaveScan(self):
-        self.initAnalysis()
         
- 
-              
-    def readRef1(self):
-        self.lhObj.wavelRef[0] = float(self.ref1.text())
         
-    def readRef2(self):
-        self.lhObj.wavelRef[1] = float(self.ref2.text())
+
+
         
-    def readRef3(self):
-        self.lhObj.wavelRef[2] = float(self.ref3.text())
-        
-    def readDeltat(self):
-        self.lhObj.deltat = float(self.deltat.text())
-        
+     
 
 ###########################      Analysis tab      ############################
     #### Initialization of analysis tab
     def initAnalysis(self):
         
         if self.lhObj.refState == 0:
-            self.AObj = analysisDatas(self.lhObj.taxis, self.lhObj.xaxisCalib,\
-            (self.lhObj.imNoRefCrop).T)
+            try:
+                self.AObj = analysisDatas(self.lhObj.taxis, self.lhObj.xaxisCalib,\
+                (self.lhObj.imNoRefCrop).T)
+            except:
+                print("Cannot initiate analysis class")
         elif self.lhObj.refState == 2:
-            self.AObj = analysisDatas(self.lhObj.taxis, self.lhObj.xaxisCalib,\
-            (self.lhObj.imScanCrop).T, (self.lhObj.imRefCrop).T)
+            print("Begin initiating", self.lhObj.refState)
+            try:
+                self.AObj = analysisDatas(self.lhObj.taxis, self.lhObj.xaxisCalib,\
+                (self.lhObj.imScanCrop).T, (self.lhObj.imRefCrop).T)
+            except:
+                print("Cannot initiate analysis class") 
+        else:
+            print("refState is wrong")
             
-        self.initComboBoxes()
-        self.initStoreButton()
-        self.initAnalysisGraph()
-        self.initSliderNormalization()
-        self.initSliderReference()
-        self.initNormPreviewButton()
-        self.initNormCancelButton()
-        self.initNormApplyButton()
-        self.initRefPreviewButton()
-        self.initRefAppButton()
-        self.initAxisBox()
-        self.initWindowBox()
-        self.initSmoothWindowLen()
-        self.initSmoothPreview()
-        self.initMovingCancelButton()
-        self.initMovingApplyButton()
-        self.initSavingEdit()
-        self.initSaveButton()
+        try:    
+            self.initComboBoxes()
+        except:
+            print("Cannot initiate combo boxes")
+          
+        try:
+            self.initStoreButton()
+        except:
+            print("Cannot initiate Store button")
             
-    ##### Graph initialization   
+        try:   
+            self.initAnalysisGraph()
+        except:
+            print("Cannot initiate Analysis Graph")            
+            
+        try:
+            self.initBackBaseline()
+        except:
+            print("Cannot initiate Baseline graph")
+            
+        try:
+            self.initNormPreviewButton()
+            self.initNormCancelButton()
+            self.initNormApplyButton()
+        except:
+            print("Cannot initiate Normalization buttons")
+        
+        try:
+            self.initRefPreviewButton()
+            self.initRefAppButton()
+            self.initRefCancelButton()
+        except:
+            print("Cannot initiate Reference button")
+        
+        try:
+            self.initAxisBox()
+            self.initWindowBox()
+            self.initSmoothWindowLen()
+            self.initSmoothPreview()
+            self.initMovingCancelButton()
+            self.initMovingApplyButton()
+        except:
+            print("Cannot initiate smooting box")
+         
+        try:
+            self.initBaselineDetect()
+        except:
+            print("Baseline detection not initiated")
+        
+        try:
+            self.initSavingEdit()
+            self.initSaveButton()
+        except:
+            print("Cannot initiate saving box")
+            
+            
+    ##### Graph initialization
+            
     def initAnalysisGraph(self):
 
         self.figAnalysis.clear()
@@ -504,19 +540,16 @@ class Main(QMainWindow, Ui_MainWindow):
                                      self.AObj.taxis,                                                                           
                                      self.AObj.displaytemp)
                                      
-        self.axesAnalysis.axvline(self.AObj.energy[self.AObj.lowerBoundNorm], color = 'white', linewidth = 2)
-        self.axesAnalysis.axvline(self.AObj.energy[self.AObj.upperBoundNorm], color = 'white', linewidth = 2)
-
-        self.axesAnalysis.axhline(self.AObj.taxis[self.AObj.lowerBoundRef], color = 'white', linewidth = 2)
-        self.axesAnalysis.axhline(self.AObj.taxis[self.AObj.upperBoundRef], color = 'white', linewidth = 2)
+        self.lineVlow = DraggableVLine(self.onmoveVlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundNorm, colorV = 'white')
+        self.lineVup = DraggableVLine(self.onmoveVup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundNorm, colorV = 'white')
         
-        self.mpl_toolbar = NavigationToolbar(self.canvasAnalysis, self)
-
+        self.lineHlow = DraggableHLine(self.onmoveHlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundRef, colorH = 'white')
+        self.lineHup = DraggableHLine(self.onmoveHup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundRef, colorH = 'white')
+                
         self.axesAnalysis.set_xlabel('Photon energy in eV')
         self.axesAnalysis.set_ylabel('Time delay (fs)')
         self.canvasAnalysis.draw()
         self.analysisGraph.addWidget(self.canvasAnalysis)
-        self.analysisGraph.addWidget(self.mpl_toolbar)
         
         
     def updateAnalysisGraph(self):
@@ -525,24 +558,51 @@ class Main(QMainWindow, Ui_MainWindow):
                                      self.AObj.taxis,                                                                           
                                      self.AObj.displaytemp)
                                      
-        self.axesAnalysis.axvline(self.AObj.energy[-self.AObj.lowerBoundNorm], color = 'white', linewidth = 2)
-        self.axesAnalysis.axvline(self.AObj.energy[-self.AObj.upperBoundNorm], color = 'white', linewidth = 2)
-
-        self.axesAnalysis.axhline(self.AObj.taxis[self.AObj.lowerBoundRef], color = 'white', linewidth = 2)
-        self.axesAnalysis.axhline(self.AObj.taxis[self.AObj.upperBoundRef], color = 'white', linewidth = 2)
+        self.lineVlow.update(self.AObj.lowerBoundNorm)
+        self.lineVup.update(self.AObj.upperBoundNorm)
+        self.lineHlow.update(self.AObj.lowerBoundRef)
+        self.lineHup.update(self.AObj.upperBoundRef)
+        
 
         self.axesAnalysis.set_xlabel('Photon energy in eV')
         self.axesAnalysis.set_ylabel('Time delay (fs)')
         self.canvasAnalysis.draw()
         
-    ##### Widgets initialization   
+        
+    def initBackBaseline(self):
+
+        self.figBackBaseline.clear()
+        self.axesBackBaseline = self.figBackBaseline.add_subplot(111)
+        
+        self.axesBackBaseline.plot(self.AObj.energy, np.mean(self.AObj.display, axis = 0))
+        self.axesBackBaseline.plot(self.AObj.energy, np.mean(self.AObj.background, axis = 0))
+
+        self.axesBackBaseline.set_xlabel('Photon energy in eV')
+        self.axesBackBaseline.set_ylabel('Time delay (fs)')
+        self.canvasBackBaseline.draw()
+        self.backBaseline.addWidget(self.canvasBackBaseline)
+        
+    def updateBackBaseline(self):
+
+        self.axesBackBaseline.cla()
+        
+        self.axesBackBaseline.plot(self.AObj.energy, np.mean(self.AObj.display, axis = 0))
+        self.axesBackBaseline.plot(self.AObj.energy, np.mean(self.AObj.background, axis = 0))
+
+
+        self.axesBackBaseline.set_xlabel('Photon energy in eV')
+        self.axesBackBaseline.set_ylabel('Time delay (fs)')
+        self.canvasBackBaseline.draw()
+        
+    #####Graph display box   
+        
     def initComboBoxes(self):
         self.scanbox.clear()
         self.refbox.clear()
         self.normbox.clear()
         
         if self.lhObj.refState == 0:
-            self.scanbox.addItem("Raw Scan")
+            self.scanbox.addItem("Raw Scan")            
             self.refbox.addItem("0")
             self.normbox.addItem("1")
             
@@ -562,82 +622,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.refStore.clicked.connect(self._onpressrefStore)
         self.normStore.clicked.connect(self._onpressnormStore)
         
-    def initSliderNormalization(self):
-        self.setSliderAnalysisLim()
-        self.lowBoundNorm.valueChanged[int].connect(self.setNormLowBound)
-        self.upBoundNorm.valueChanged[int].connect(self.setNormUpBound)
-
-    def initSliderReference(self):
-        self.setSliderAnalysisLim()
-        self.lowBoundRef.valueChanged[int].connect(self.setRefLowBound)
-        self.upBoundRef.valueChanged[int].connect(self.setRefUpBound)
-        
-    def setSliderAnalysisLim(self):
-        self.lowBoundNorm.setMinimum(0)
-        self.lowBoundNorm.setMaximum(len(self.AObj.energy)-1)
-        
-        self.upBoundNorm.setMinimum(0)
-        self.upBoundNorm.setMaximum(len(self.AObj.energy)-1)
-        
-        self.lowBoundRef.setMinimum(0)
-        self.lowBoundRef.setMaximum(len(self.AObj.taxis)-1)
-        
-        self.upBoundRef.setMinimum(0)
-        self.upBoundRef.setMaximum(len(self.AObj.taxis)-1)
-        
-    def initNormPreviewButton(self):
-        self.normalizationPre.clicked.connect(self.updateNormPreview)
-        
-    def initNormCancelButton(self):
-        self.normalizationCan.clicked.connect(self.updateNormCan)
-        
-    def initNormApplyButton(self):
-        self.normalizationApp.clicked.connect(self.updateNormApp)
-        
-    def initRefPreviewButton(self):
-        self.referencePre.clicked.connect(self.updateRefPreview)
-        
-    def initRefCancelButton(self):
-        self.referenceCan.clicked.connect(self.updateRefCan)
-        
-    def initRefAppButton(self):
-        self.referenceApp.clicked.connect(self.updateRefApp)   
-        
-    def initAxisBox(self):
-        self.axisBox.clear()
-        self.axisBox.addItem("Time")
-        self.axisBox.addItem("Energy")        
-        self.axisBox.activated[str].connect(self.setSmoothAxis)
-        
-    def initWindowBox(self):
-        self.windowBox.clear()
-        self.windowBox.addItems(['flat', 'hanning', 'hamming', 'bartlett', 'blackman'])       
-        self.windowBox.activated[str].connect(self.setSmoothWindow)
-        
-    def initSmoothWindowLen(self):
-        self.windowLenEdit.setText(str(self.AObj.windowLen))
-        self.windowLenEdit.returnPressed.connect(self.setSmoothWindowLen)
-        
-    def initSmoothPreview(self):
-        self.movingPre.clicked.connect(self.updateSmoothGraph)   
-        
-    def initMovingCancelButton(self):
-        self.movingCan.clicked.connect(self.updateNormCan)
-        
-    def initMovingApplyButton(self):
-        self.movingApp.clicked.connect(self.updateNormApp)   
-        
-    def initSavingEdit(self):
-        self.dateEdit.setText("Enter date")
-        self.nameEdit.setText("Enter scan name")
-        
-    def initSaveButton(self):   
-        self.saveButton.clicked.connect(self.onpressSaveButton) 
-        
-        
-        
-    
-    ##### callback functions for widgets    
     def onScanBoxActivated(self, text):
         self.AObj.scan = self.AObj.itemDict[str(text)]
         self.AObj.updateDisplay()
@@ -665,12 +649,21 @@ class Main(QMainWindow, Ui_MainWindow):
         self.normbox.addItem("Processed norm " + str(self.AObj.noProcessedNorm))
         self.AObj.storeProcessedToNorm()
         
+        
+    ##### Normalization box
+    
+        
+    def initNormPreviewButton(self):
+        self.normalizationPre.clicked.connect(self.updateNormPreview)
+        
+    def initNormCancelButton(self):
+        self.normalizationCan.clicked.connect(self.updateNormCan)
+        
+    def initNormApplyButton(self):
+        self.normalizationApp.clicked.connect(self.updateNormApp)
+        
     def updateNormPreview(self):
         self.AObj.normalization()
-        self.updateAnalysisGraph()
-        
-    def updateRefPreview(self):
-        self.AObj.createRef()
         self.updateAnalysisGraph() 
         
     def updateNormCan(self):
@@ -682,11 +675,35 @@ class Main(QMainWindow, Ui_MainWindow):
         index = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
         self.AObj.validateChange()
         self.AObj.storeProcessedToScan()        
-        self.scanbox.setCurrentIndex(index)
+        self.scanbox.setCurrentIndex(index)    
+        
+    def onmoveVlow(self, value):
+        self.AObj.lowerBoundNorm = value
+     
+    def onmoveVup(self, value):
+        self.AObj.upperBoundNorm = value
+        
+        
+        
+    ##### Reference box    
+      
+        
+    def initRefPreviewButton(self):
+        self.referencePre.clicked.connect(self.updateRefPreview)
+        
+    def initRefCancelButton(self):
+        self.referenceCan.clicked.connect(self.updateRefCan)
+        
+    def initRefAppButton(self):
+        self.referenceApp.clicked.connect(self.updateRefApp)  
         
     def updateRefCan(self):
         self.AObj.displaytemp = self.AObj.display
         self.updateAnalysisGraph()
+        
+    def updateRefPreview(self):
+        self.AObj.createRef()
+        self.updateAnalysisGraph() 
         
     def updateRefApp(self):
         self.AObj.display = self.AObj.displaytemp
@@ -695,22 +712,43 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.storeProcessedToRef()
         self.refbox.setCurrentIndex(index)
         
-    def setNormLowBound(self, value):
-        self.AObj.lowerBoundNorm = int(value)
-        self.updateAnalysisGraph()
+    def onmoveHlow(self, value):
+        self.AObj.lowerBoundRef = value
         
-    def setNormUpBound(self, value):
-        self.AObj.upperBoundNorm = int(value)
-        self.updateAnalysisGraph()
+    def onmoveHup(self, value):
+        self.AObj.upperBoundRef = value
         
-    def setRefLowBound(self, value):
-        self.AObj.lowerBoundRef = int(value)
-        self.updateAnalysisGraph()
         
-    def setRefUpBound(self, value):
-        self.AObj.upperBoundRef = int(value)
-        self.updateAnalysisGraph()
         
+    ##### Moving average box
+        
+    def initAxisBox(self):
+        self.axisBox.clear()
+        self.axisBox.addItem("Time")
+        self.axisBox.addItem("Energy")        
+        self.axisBox.activated[str].connect(self.setSmoothAxis)
+        
+    def initWindowBox(self):
+        self.windowBox.clear()
+        self.windowBox.addItems(['flat', 'hanning', 'hamming', 'bartlett', 'blackman'])       
+        self.windowBox.activated[str].connect(self.setSmoothWindow)
+        
+    def initSmoothWindowLen(self):
+        self.windowLenEdit.setValue(int(self.AObj.windowLen))
+        self.windowLenEdit.valueChanged.connect(self.setSmoothWindowLen)
+        
+    def initSmoothPreview(self):
+        self.movingPre.clicked.connect(self.updateSmoothGraph)   
+        
+    def initMovingCancelButton(self):
+        self.movingCan.clicked.connect(self.updateNormCan)
+        
+    def initMovingApplyButton(self):
+        if self.AObj.axisSmoothCurrent == 1:
+            self.movingApp.clicked.connect(self.updateNormApp)
+        elif self.AObj.axisSmoothCurrent == 0:
+            self.movingApp.clicked.connect(self.updateBackApp)
+          
     def setSmoothAxis(self, text):
         self.AObj.axisSmoothCurrent = self.AObj.axisSmoothList[str(text)]
         
@@ -718,21 +756,94 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.windowType = str(text)
         
     def setSmoothWindowLen(self):
-        self.AObj.windowLen = float(self.windowLenEdit.text())
+        self.AObj.windowLen = int(self.windowLenEdit.value())
         
     def updateSmoothGraph(self):
-        self.AObj.windowLen = float(self.windowLenEdit.text())
-        
         self.AObj.movingAverage()
+        if self.AObj.axisSmoothCurrent == 0:
+            self.updateAnalysisGraph() 
+        elif self.AObj.axisSmoothCurrent == 1:
+            self.updateAnalysisGraph() 
+            self.updateBackBaseline()
+            
+    def updateBackApp(self):
+        self.scanbox.addItem("Processed Scan " + str(self.AObj.noProcessedScan))
+        index1 = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
+        
+        self.refbox.addItem("Background " + str(self.AObj.noProcessedScan))
+        index2 = self.refbox.findText("0")
+        
+        self.AObj.validateChange()
+        self.AObj.storeProcessedToScan()
+        self.AObj.storeToBack()
+        self.scanbox.setCurrentIndex(index1) 
+        self.refbox.setCurrentIndex(index2) 
+            
+            
+    ##### baseline detection
+    def initBaselineDetect(self):
+        self.initsmoothness()
+        self.initAsymmetry()
+        self.initNiter()
+        self.initbasePre()
+        self.initbaseApp()
+        self.initBaseCan()
+            
+    def initsmoothness(self):
+        self.smoothness.setText("10")
+        
+    def initAsymmetry(self):
+        self.asymmetry.setText("0.001")
+        
+    def initNiter(self):
+        self.Niter.setValue(10)
+        
+    def initbasePre(self):
+        self.basePre.clicked.connect(self.updateBasePre)
+        
+    def initbaseApp(self):
+        self.baseApp.clicked.connect(self.updateBaseApp)
+        
+    def initBaseCan(self):
+        self.baseCan.clicked.connect(self.updateNormCan)
+              
+    def updateBasePre(self):
+        lam = float(self.smoothness.text())
+        p = float(self.asymmetry.text())
+        niter = self.Niter.value()
+        self.AObj.getPeaks(lam, p, niter)
         self.updateAnalysisGraph()
+        self.updateBackBaseline()
+        
+    def updateBaseApp(self):
+        self.scanbox.addItem("Processed Scan " + str(self.AObj.noProcessedScan))
+        index1 = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
+        
+        self.refbox.addItem("Background " + str(self.AObj.noProcessedScan))
+        index2 = self.refbox.findText("0")
+        
+        self.AObj.validateChange()
+        self.AObj.storeProcessedToScan()
+        self.AObj.storeToBack()
+        self.scanbox.setCurrentIndex(index1) 
+        self.refbox.setCurrentIndex(index2) 
+
+        
+        
+        
+    ##### Saving box
+        
+    def initSavingEdit(self):
+        self.dateEdit.setText("Enter date")
+        self.nameEdit.setText("Enter scan name")
+        
+    def initSaveButton(self):   
+        self.saveButton.clicked.connect(self.onpressSaveButton) 
         
     def onpressSaveButton(self):
         scanDate = str(self.dateEdit.text())
         scanName = str(self.nameEdit.text())
         self.AObj.saveAnalysisData(scanDate, scanName)
-        
-        
-        
         
         
 
