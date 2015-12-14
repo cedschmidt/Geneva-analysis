@@ -7,15 +7,14 @@ Created on Tue Aug 25 15:37:48 2015
 
 
 #  Import libraries and classes
-
-from __future__ import division, print_function
-import numpy as np
-
+from __future__ import absolute_import, division, print_function
 import sys, gc
+    
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.uic import loadUiType
 
+import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -819,7 +818,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.scanbox.addItem("Processed Scan " + str(self.AObj.noProcessedScan))
         index1 = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
         
-        self.refbox.addItem("Background " + str(self.AObj.noProcessedScan))
+        self.refbox.addItem("Background " + str(self.AObj.noBackground))
         index2 = self.refbox.findText("0")
         
         self.AObj.validateChange()

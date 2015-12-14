@@ -1,7 +1,6 @@
 # coding: utf-8
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from matplotlib.widgets import _SelectorWidget, ToolHandles
@@ -620,10 +619,10 @@ class DraggableHLine:
 def smooth(x,window_len=11,window='hanning'):
     
     if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
+        raise ValueError("smooth only accepts 1 dimension arrays.")
 
     if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
+        raise ValueError("Input vector needs to be bigger than window size.")
 
 
     if window_len<3:
@@ -631,7 +630,7 @@ def smooth(x,window_len=11,window='hanning'):
 
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
 
     s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
@@ -660,7 +659,7 @@ def movingSmooth(array, axis, windowLen, windowType):
         for idx in range(m):       
             smoothedArray[idx, :] = smooth(array[idx, :], windowLen, windowType)
     else:
-        raise ValueError, "You didn't enter a valid value for axis number (0, 1)"
+        raise ValueError("You didn't enter a valid value for axis number (0, 1)")
         
     return smoothedArray
     
@@ -686,7 +685,7 @@ def baseline_als(y, lam, p, niter=10):
     D = csc_matrix(np.diff(np.eye(L), 2))
     w = np.ones(L)
     
-    for i in xrange(niter):
+    for i in range(niter):
         W = spdiags(w, 0, L, L)
         Z = W + lam * D.dot(D.transpose())
         z = spsolve(Z, w*y)

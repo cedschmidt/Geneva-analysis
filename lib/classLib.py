@@ -1,7 +1,6 @@
 # coding: utf-8
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import glob
@@ -10,8 +9,8 @@ from scipy.misc import imread
 from scipy.optimize import curve_fit
 
 
-from progressbar import ProgressBar, Percentage, Bar
-from funLib import *
+#from progressbar import ProgressBar, Percentage, Bar
+from lib.funLib import *
 
 
 class scanData(object):
@@ -118,11 +117,11 @@ class scanData(object):
         imStackscanInit = np.zeros((self.imSizeInit[0], self.imSizeInit[1], int(self.noImage/2)), int)
         imStackrefInit = np.zeros((self.imSizeInit[0], self.imSizeInit[1], int(self.noImage/2)), int)
         
-        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=self.noImage).start()
+        #pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=self.noImage).start()
         print('Loading images in stack')
                 
         for idx in range(self.noImage):
-            pbar.update(idx+1)
+            #pbar.update(idx+1)
             self.imStackscanTot[:, :, idx] = imread(self.nameList[idx])
             if idx%2 == 0:
                 imStackscanInit[:, :, int(idx/2)] = self.imStackscanTot[:, :, idx]
