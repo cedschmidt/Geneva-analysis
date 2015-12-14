@@ -769,7 +769,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.scanbox.addItem("Processed Scan " + str(self.AObj.noProcessedScan))
         index1 = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
         
-        self.refbox.addItem("Background " + str(self.AObj.noProcessedScan))
+        self.refbox.addItem("Background " + str(self.AObj.noBackground))
         index2 = self.refbox.findText("0")
         
         self.AObj.validateChange()
