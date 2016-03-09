@@ -8,7 +8,7 @@ Created on Tue Aug 25 15:37:48 2015
 
 #  Import libraries and classes
 from __future__ import absolute_import, division, print_function
-import sys
+import sys, gc
     
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
