@@ -490,6 +490,7 @@ class DraggableVLine:
         self.canvas.restore_region(self.background)
         self.ax.draw_artist(self.Vline)
         self.canvas.blit(self.ax.bbox)
+        self.fun(self.pos)
 
 
 
@@ -498,7 +499,7 @@ class DraggableVLine:
         self.press = None    
         self.background = None
         self.Vline.set_animated(False)
-        self.fun(self.pos)
+        
         
         
     def update(self, position):
@@ -577,6 +578,8 @@ class DraggableHLine:
 
         # blit just the redrawn area
         self.canvas.blit(self.ax.bbox)
+        
+        self.fun(self.pos)
 
 
     def on_release(self, event):
@@ -584,7 +587,6 @@ class DraggableHLine:
         self.press = None    
         self.background = None
         self.Hline.set_animated(False)
-        self.fun(self.pos)
         
     def update(self, position):
         self.pos = position

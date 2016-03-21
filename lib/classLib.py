@@ -29,7 +29,7 @@ class scanData(object):
         self.wavelRef = np.zeros(3, float)
         self.specRef = np.array([0, 20, 50], int)
         
-        self.t0Ref = 35
+        self.t0Ref = 10
         self.deltat = -20
 
         
@@ -210,11 +210,11 @@ class analysisDatas(object):
         self.noProcessedNorm = 0  
         self.noBackground = 0
         
-        self.lowerBoundNorm = np.amin(self.energy) + 10
-        self.upperBoundNorm = np.amax(self.energy) - 10
+        self.lowerBoundNorm = np.amin(self.energy) + 0.5*np.abs(np.amin(self.energy)) + 1
+        self.upperBoundNorm = 0.75*np.amax(self.energy)
         
-        self.lowerBoundRef = np.amin(self.taxis) + 30
-        self.upperBoundRef = np.amax(self.taxis) - 30
+        self.lowerBoundRef = np.amin(self.taxis) + 0.5*np.abs(np.amin(self.taxis)) + 1
+        self.upperBoundRef = 0.75*np.amax(self.taxis)
         
         self.axisSmoothList = {"Time":0, "Energy":1}
         self.axisSmoothCurrent = 0
@@ -244,6 +244,20 @@ class analysisDatas(object):
         for idx in range(len(sumRef)):
             self.displaytemp[idx, :] = self.display[idx, :]/sumRef[idx]
             
+    def vertAnalysis(self):
+        lmin = np.argmin(np.abs(self.energy - self.lowerBoundNorm))
+        lmax = np.argmin(np.abs(self.energy - self.upperBoundNorm))
+        
+        self.vertPlot1 = self.displaytemp[:, lmin]
+        self.vertPlot2 = self.displaytemp[:, lmax]
+        
+    def horAnalysis(self):
+        lmin = np.argmin(np.abs(self.taxis - self.lowerBoundRef))
+        lmax = np.argmin(np.abs(self.taxis - self.upperBoundRef))
+        
+        self.horPlot1 = self.displaytemp[lmin, :]
+        self.horPlot2 = self.displaytemp[lmax, :]
+              
     def createRef(self):
         lmin = np.argmin(np.abs(self.taxis - self.lowerBoundRef))
         lmax = np.argmin(np.abs(self.taxis - self.upperBoundRef))
@@ -283,7 +297,7 @@ class analysisDatas(object):
         self.noBackground += 1
 
         
-    def saveAnalysisData(self, scanDate, scanName):
+    def saveAnalysisData(self, scanDate, scanName, figlist):
         
         path = os.getcwd() + "/Datas/"             
         pathname2 = "current/"
@@ -308,9 +322,13 @@ class analysisDatas(object):
         
         np.savetxt(savingPath1 + "currentScan.txt", self.display)
         
-        for key, value in self.itemDict.iteritems():
-            if np.size(value)>1:
-                np.savetxt(savingPath2 + str(key) + ".txt", value)
+        for idx, val in enumerate(figlist):
+            val.savefig(savingPath1 + str(idx) + ".png")
+                
+        
+        for key in self.itemDict.keys():
+            if (type(self.itemDict[key]) != float):
+                np.savetxt(savingPath2 + str(key) + ".txt", self.itemDict[key])
             
         
         

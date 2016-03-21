@@ -173,7 +173,7 @@
             <enum>QTabWidget::Rounded</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <property name="elideMode">
             <enum>Qt::ElideRight</enum>
@@ -182,229 +182,203 @@
             <attribute name="title">
              <string>Spectral calibration</string>
             </attribute>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
-              <widget class="QSplitter" name="splitter_4">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+              <widget class="QWidget" name="widget_3" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <widget class="QWidget" name="widget_3" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>750</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <layout class="QVBoxLayout" name="mplSpecCalib"/>
-               </widget>
-               <widget class="QWidget" name="">
-                <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="0" column="0" colspan="2">
-                  <widget class="QLabel" name="label_9">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>15</pointsize>
-                     <weight>75</weight>
-                     <bold>true</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Choice of reference wavelength</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_10">
-                   <property name="palette">
-                    <palette>
-                     <active>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>255</red>
-                         <green>0</green>
-                         <blue>0</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </active>
-                     <inactive>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>255</red>
-                         <green>0</green>
-                         <blue>0</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </inactive>
-                     <disabled>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>120</red>
-                         <green>120</green>
-                         <blue>120</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </disabled>
-                    </palette>
-                   </property>
-                   <property name="text">
-                    <string>Reference 1 in eV</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="ref1">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_11">
-                   <property name="palette">
-                    <palette>
-                     <active>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>0</red>
-                         <green>68</green>
-                         <blue>255</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </active>
-                     <inactive>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>0</red>
-                         <green>68</green>
-                         <blue>255</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </inactive>
-                     <disabled>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>120</red>
-                         <green>120</green>
-                         <blue>120</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </disabled>
-                    </palette>
-                   </property>
-                   <property name="text">
-                    <string>Reference 2 in eV</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="ref2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_12">
-                   <property name="palette">
-                    <palette>
-                     <active>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>0</red>
-                         <green>148</green>
-                         <blue>22</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </active>
-                     <inactive>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>0</red>
-                         <green>148</green>
-                         <blue>22</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </inactive>
-                     <disabled>
-                      <colorrole role="WindowText">
-                       <brush brushstyle="SolidPattern">
-                        <color alpha="255">
-                         <red>120</red>
-                         <green>120</green>
-                         <blue>120</blue>
-                        </color>
-                       </brush>
-                      </colorrole>
-                     </disabled>
-                    </palette>
-                   </property>
-                   <property name="text">
-                    <string>Reference 3 in eV</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="ref3">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0" colspan="2">
-                  <widget class="QPushButton" name="push_calib">
-                   <property name="text">
-                    <string>Calibrate</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0" colspan="2">
-                  <spacer name="verticalSpacer">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                </layout>
-               </widget>
+               <property name="minimumSize">
+                <size>
+                 <width>750</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <layout class="QVBoxLayout" name="mplSpecCalib"/>
               </widget>
+             </item>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_5">
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="label_9">
+                 <property name="font">
+                  <font>
+                   <family>Arial</family>
+                   <pointsize>15</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Choice of reference wavelength</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_10">
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>255</red>
+                       <green>0</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>255</red>
+                       <green>0</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
+                 </property>
+                 <property name="text">
+                  <string>Reference 1 in eV</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="ref1"/>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>68</green>
+                       <blue>255</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>68</green>
+                       <blue>255</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
+                 </property>
+                 <property name="text">
+                  <string>Reference 2 in eV</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="ref2"/>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>148</green>
+                       <blue>22</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>148</green>
+                       <blue>22</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="WindowText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
+                 </property>
+                 <property name="text">
+                  <string>Reference 3 in eV</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="ref3"/>
+               </item>
+               <item row="4" column="0" colspan="2">
+                <widget class="QPushButton" name="push_calib">
+                 <property name="text">
+                  <string>Calibrate</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0" colspan="2">
+                <spacer name="verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -583,6 +557,57 @@
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
                 <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="1" column="3">
+                  <widget class="QComboBox" name="refbox"/>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_4">
+                   <property name="font">
+                    <font>
+                     <pointsize>14</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>-</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="QLabel" name="label_15">
+                   <property name="text">
+                    <string>Reference</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_7">
+                   <property name="text">
+                    <string>Scan</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="6">
+                  <widget class="QLabel" name="label_16">
+                   <property name="text">
+                    <string>Normalization</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="6">
+                  <widget class="QComboBox" name="normbox"/>
+                 </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_3">
                    <property name="font">
@@ -598,58 +623,11 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="8">
-                  <widget class="QLabel" name="label_16">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Normalization</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="scanbox"/>
                  </item>
-                 <item row="0" column="4">
-                  <widget class="QLabel" name="label_15">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Reference</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="5">
-                  <widget class="QPushButton" name="refStore">
-                   <property name="font">
-                    <font>
-                     <pointsize>6</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Store current in Reference</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="7">
+                 <item row="1" column="5">
                   <widget class="QLabel" name="label_6">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
                    <property name="font">
                     <font>
                      <pointsize>14</pointsize>
@@ -663,87 +641,8 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="2">
-                  <widget class="QPushButton" name="scanStore">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>6</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Store current in Scan</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="9">
-                  <widget class="QPushButton" name="normStore">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>6</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Store current in Normalization</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_7">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Scan</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="3">
-                  <widget class="QLabel" name="label_4">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>14</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>-</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="6">
+                 <item row="1" column="4">
                   <widget class="QLabel" name="label_5">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
                    <property name="font">
                     <font>
                      <pointsize>14</pointsize>
@@ -757,18 +656,26 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1" colspan="2">
-                  <widget class="QComboBox" name="scanbox">
-                   <property name="enabled">
-                    <bool>true</bool>
+                 <item row="2" column="1">
+                  <widget class="QPushButton" name="scanStore">
+                   <property name="text">
+                    <string>Store current in Scan</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="4" colspan="2">
-                  <widget class="QComboBox" name="refbox"/>
+                 <item row="2" column="3">
+                  <widget class="QPushButton" name="refStore">
+                   <property name="text">
+                    <string>Store current in Reference</string>
+                   </property>
+                  </widget>
                  </item>
-                 <item row="1" column="8" colspan="2">
-                  <widget class="QComboBox" name="normbox"/>
+                 <item row="2" column="6">
+                  <widget class="QPushButton" name="normStore">
+                   <property name="text">
+                    <string>Store current in Normalization</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -876,7 +783,7 @@
           </widget>
           <widget class="QTabWidget" name="tabWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="Datas">
             <attribute name="title">
@@ -886,7 +793,7 @@
              <item>
               <widget class="QGroupBox" name="groupBox_2">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -895,6 +802,15 @@
                 <string>Normalization</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_5">
+                <item>
+                 <widget class="QLabel" name="label_20">
+                  <property name="text">
+                   <string>With the 2 vertical cursor, choose an area where the software 
+wil integrate and normalize the spectrum from.This is intended 
+to compensate the shot to shot intensity fluctuations</string>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_3">
                   <item>
@@ -936,13 +852,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QPushButton" name="helpNormButton">
-                    <property name="text">
-                     <string>Help</string>
-                    </property>
-                   </widget>
-                  </item>
                  </layout>
                 </item>
                </layout>
@@ -951,7 +860,7 @@
              <item>
               <widget class="QGroupBox" name="groupBox_3">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -961,9 +870,18 @@
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_7">
                 <item>
+                 <widget class="QLabel" name="label_24">
+                  <property name="text">
+                   <string>With the two horizontal cursors, select an area where you don't 
+expect any signal change. Then the software will do the average 
+and substract it to the all the spectrum.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <layout class="QGridLayout" name="gridLayout_7">
-                  <item row="0" column="2">
-                   <widget class="QPushButton" name="referenceCan">
+                  <item row="0" column="0">
+                   <widget class="QPushButton" name="referencePre">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -971,7 +889,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>Cancel</string>
+                     <string>Preview</string>
                     </property>
                    </widget>
                   </item>
@@ -988,8 +906,8 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="0">
-                   <widget class="QPushButton" name="referencePre">
+                  <item row="0" column="2">
+                   <widget class="QPushButton" name="referenceCan">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -997,14 +915,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>Preview</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QPushButton" name="helpRefButton">
-                    <property name="text">
-                     <string>Help</string>
+                     <string>Cancel</string>
                     </property>
                    </widget>
                   </item>
@@ -1016,7 +927,7 @@
              <item>
               <widget class="QGroupBox" name="groupBox_4">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -1135,12 +1046,6 @@
              </item>
              <item>
               <widget class="QGroupBox" name="groupBox_6">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="title">
                 <string>Baseline detection</string>
                </property>

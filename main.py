@@ -18,6 +18,7 @@ import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 from lib.classLib import scanData, analysisDatas
 from lib.funLib import  DraggableVLine, DraggableHLine, RectangleSelector
@@ -62,6 +63,13 @@ class Main(QMainWindow, Ui_MainWindow):
                 #Figure for 1d background baseline
             self.figBackBaseline = Figure(facecolor='1')
             self.canvasBackBaseline = FigureCanvas(self.figBackBaseline)
+             # Figure for vertical scan plot with cursors
+            self.figVertAnalysis = Figure(facecolor = "1")
+            self.canvasVertAnalysis = FigureCanvas(self.figVertAnalysis)
+            
+                # Figure for horizontal scan plot with cursors
+            self.figHorAnalysis = Figure(facecolor = "1")
+            self.canvasHorAnalysis = FigureCanvas(self.figHorAnalysis)
         else:
             #Initiate main window
             self.setupUi(self)
@@ -86,6 +94,14 @@ class Main(QMainWindow, Ui_MainWindow):
                 #Figure for 1d background baseline
             self.figBackBaseline = Figure(facecolor='1')
             self.canvasBackBaseline = FigureCanvas(self.figBackBaseline)
+            
+                # Figure for vertical scan plot with cursors
+            self.figVertAnalysis = Figure(facecolor = "1")
+            self.canvasVertAnalysis = FigureCanvas(self.figVertAnalysis)
+            
+                # Figure for horizontal scan plot with cursors
+            self.figHorAnalysis = Figure(facecolor = "1")
+            self.canvasHorAnalysis = FigureCanvas(self.figHorAnalysis)
             
             # Creation of scan object and range for image display (specific to each scan)                  
             self.initScanObject(foldername)
@@ -157,7 +173,6 @@ class Main(QMainWindow, Ui_MainWindow):
 ################################   Calibration tab ############################
         
     def initCalibrationTab(self):
-        print("test2")
         self.initSliderH()
         self.initSliderV()
         self.plot2d()
@@ -281,8 +296,11 @@ class Main(QMainWindow, Ui_MainWindow):
         self.line2 = DraggableVLine(self.moveRef2,self.axes1dSpecCalib, self.canvas1dSpecCalib, self.lhObj.specRef[1], colorV = 'blue')
         self.line3 = DraggableVLine(self.moveRef3,self.axes1dSpecCalib, self.canvas1dSpecCalib, self.lhObj.specRef[2], colorV = 'green')
         
+        self.navi_toolbar = NavigationToolbar(self.canvas1dSpecCalib, self)
+        
         self.canvas1dSpecCalib.draw()
         self.mplSpecCalib.addWidget(self.canvas1dSpecCalib)
+        self.mplSpecCalib.addWidget(self.navi_toolbar)
         
     ########## 1D spectrum for calibration
         
@@ -360,7 +378,7 @@ class Main(QMainWindow, Ui_MainWindow):
                                                self.lhObj.taxis,                                                                              
                                                np.transpose(self.lhObj.imNoRefCrop))
                                                
-        self.linet0 = DraggableHLine(self.movet0Ref, self.axes2dScan, self.canvas2dScan, self.lhObj.t0Ref, colorH = 'white')
+        self.linet0 = DraggableHLine(self.movet0Ref, self.axes2dScan, self.canvas2dScan, self.lhObj.t0Ref, colorH = 'gold')
                                               
         self.axes2dScan.set_xlabel('Photon Energy')
         self.axes2dScan.set_ylabel('Time')
@@ -496,6 +514,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.initNormPreviewButton()
             self.initNormCancelButton()
             self.initNormApplyButton()
+            self.initHelpNormButton()
         except:
             print("Cannot initiate Normalization buttons")
         
@@ -503,6 +522,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.initRefPreviewButton()
             self.initRefAppButton()
             self.initRefCancelButton()
+            self.initHelpRefButton()
         except:
             print("Cannot initiate Reference button")
         
@@ -527,6 +547,10 @@ class Main(QMainWindow, Ui_MainWindow):
         except:
             print("Cannot initiate saving box")
             
+        try:
+            self.initPlotAnalysisTab()
+        except:
+            print("Cannot initialize Analysis plotting tab")
             
     ##### Graph initialization
             
@@ -539,11 +563,11 @@ class Main(QMainWindow, Ui_MainWindow):
                                      self.AObj.taxis,                                                                           
                                      self.AObj.displaytemp)
                                      
-        self.lineVlow = DraggableVLine(self.onmoveVlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundNorm, colorV = 'white')
-        self.lineVup = DraggableVLine(self.onmoveVup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundNorm, colorV = 'white')
+        self.lineVlow = DraggableVLine(self.onmoveVlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundNorm, colorV = 'gold')
+        self.lineVup = DraggableVLine(self.onmoveVup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundNorm, colorV = 'gold')
         
-        self.lineHlow = DraggableHLine(self.onmoveHlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundRef, colorH = 'white')
-        self.lineHup = DraggableHLine(self.onmoveHup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundRef, colorH = 'white')
+        self.lineHlow = DraggableHLine(self.onmoveHlow, self.axesAnalysis, self.canvasAnalysis, self.AObj.lowerBoundRef, colorH = 'gold')
+        self.lineHup = DraggableHLine(self.onmoveHup, self.axesAnalysis, self.canvasAnalysis, self.AObj.upperBoundRef, colorH = 'gold')
                 
         self.axesAnalysis.set_xlabel('Photon energy in eV')
         self.axesAnalysis.set_ylabel('Time delay (fs)')
@@ -592,6 +616,58 @@ class Main(QMainWindow, Ui_MainWindow):
         self.axesBackBaseline.set_xlabel('Photon energy in eV')
         self.axesBackBaseline.set_ylabel('Time delay (fs)')
         self.canvasBackBaseline.draw()
+        
+        
+    def initPlotsAnalysis(self):
+        
+        self.figVertAnalysis.clear()
+        self.figHorAnalysis.clear()
+        
+        self.axesVertAnalysis = self.figVertAnalysis.add_subplot(111)
+        self.axesHorAnalysis = self.figHorAnalysis.add_subplot(111)
+        
+        self.axesVertAnalysis.plot(self.AObj.taxis, self.AObj.vertPlot1)
+        self.axesVertAnalysis.plot(self.AObj.taxis, self.AObj.vertPlot2)
+        
+        self.axesVertAnalysis.set_xlabel("Time in fs")
+        self.axesVertAnalysis.set_ylabel("Intensity (arbitrary unit)")
+        
+        self.axesHorAnalysis.plot(self.AObj.energy, self.AObj.horPlot1)
+        self.axesHorAnalysis.plot(self.AObj.energy, self.AObj.horPlot2)
+        
+        self.axesHorAnalysis.set_xlabel("Photon energy in eV")
+        self.axesHorAnalysis.set_ylabel("Intensity (arbitrary unit)")
+        
+        self.canvasVertAnalysis.draw()
+        self.canvasHorAnalysis.draw()
+        
+        self.plotVertAnalysis.addWidget(self.canvasVertAnalysis)
+        self.plotHorAnalysis.addWidget(self.canvasHorAnalysis)
+        
+    def updateVertPlot(self):
+        
+        self.axesVertAnalysis.cla()
+        
+        self.axesVertAnalysis.plot(self.AObj.taxis, self.AObj.vertPlot1)
+        self.axesVertAnalysis.plot(self.AObj.taxis, self.AObj.vertPlot2)
+        
+        self.axesVertAnalysis.set_xlabel("Time in fs")
+        self.axesVertAnalysis.set_ylabel("Intensity (arbitrary unit)")
+        
+        self.canvasVertAnalysis.draw()
+        
+    def updateHorPlot(self):
+        
+        self.axesHorAnalysis.cla()
+        
+        self.axesHorAnalysis.plot(self.AObj.energy, self.AObj.horPlot1)
+        self.axesHorAnalysis.plot(self.AObj.energy, self.AObj.horPlot2)
+        
+        self.axesHorAnalysis.set_xlabel("Photon energy in eV")
+        self.axesHorAnalysis.set_ylabel("Intensity (arbitrary unit)")
+        
+        self.canvasHorAnalysis.draw()
+        
         
     #####Graph display box   
         
@@ -661,6 +737,9 @@ class Main(QMainWindow, Ui_MainWindow):
     def initNormApplyButton(self):
         self.normalizationApp.clicked.connect(self.updateNormApp)
         
+    def initHelpNormButton(self):
+        self.helpNormButton.clicked.connect(showDialogNorm)
+        
     def updateNormPreview(self):
         self.AObj.normalization()
         self.updateAnalysisGraph() 
@@ -674,13 +753,18 @@ class Main(QMainWindow, Ui_MainWindow):
         index = self.scanbox.findText("Processed Scan " + str(self.AObj.noProcessedScan))
         self.AObj.validateChange()
         self.AObj.storeProcessedToScan()        
-        self.scanbox.setCurrentIndex(index)    
+        self.scanbox.setCurrentIndex(index) 
         
     def onmoveVlow(self, value):
         self.AObj.lowerBoundNorm = value
+        self.AObj.vertAnalysis()
+        self.updateVertPlot()
      
     def onmoveVup(self, value):
         self.AObj.upperBoundNorm = value
+        self.AObj.vertAnalysis()
+        self.updateVertPlot()
+        
         
         
         
@@ -696,6 +780,9 @@ class Main(QMainWindow, Ui_MainWindow):
     def initRefAppButton(self):
         self.referenceApp.clicked.connect(self.updateRefApp)  
         
+    def initHelpRefButton(self):
+        self.helpRefButton.clicked.connect(showDialogRef)
+        
     def updateRefCan(self):
         self.AObj.displaytemp = self.AObj.display
         self.updateAnalysisGraph()
@@ -710,12 +797,19 @@ class Main(QMainWindow, Ui_MainWindow):
         index = self.refbox.findText("Processed ref " + str(self.AObj.noProcessedRef))
         self.AObj.storeProcessedToRef()
         self.refbox.setCurrentIndex(index)
+
         
     def onmoveHlow(self, value):
         self.AObj.lowerBoundRef = value
+        self.AObj.horAnalysis()
+        self.updateHorPlot()
         
     def onmoveHup(self, value):
         self.AObj.upperBoundRef = value
+        self.AObj.horAnalysis()
+        self.updateHorPlot()
+        
+    
         
         
         
@@ -777,6 +871,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.storeToBack()
         self.scanbox.setCurrentIndex(index1) 
         self.refbox.setCurrentIndex(index2) 
+        
             
             
     ##### baseline detection
@@ -826,9 +921,17 @@ class Main(QMainWindow, Ui_MainWindow):
         self.AObj.storeToBack()
         self.scanbox.setCurrentIndex(index1) 
         self.refbox.setCurrentIndex(index2) 
+    
 
-        
-        
+
+
+    ##### multiple Plot tab
+
+    def initPlotAnalysisTab(self):
+        self.AObj.horAnalysis()
+        self.AObj.vertAnalysis()
+        self.initPlotsAnalysis()
+                     
         
     ##### Saving box
         
@@ -842,13 +945,35 @@ class Main(QMainWindow, Ui_MainWindow):
     def onpressSaveButton(self):
         scanDate = str(self.dateEdit.text())
         scanName = str(self.nameEdit.text())
-        self.AObj.saveAnalysisData(scanDate, scanName)
+        figlist = [self.fig1dSpecCalib, self.figHorAnalysis, self.figVertAnalysis,
+                   self.figAnalysis]
+        self.AObj.saveAnalysisData(scanDate, scanName, figlist)
         
         
 
             
-        
+def showDialogRef():
+   msg = QMessageBox()
+   msg.setIcon(QMessageBox.Information)
 
+   msg.setText("With the two horizontal cursors, select an area where you don't\
+    expect any signal change. Then the software will do the average and substract\
+   it to the all the spectrum.")
+   msg.setWindowTitle("Reference help")
+   msg.setStandardButtons(QMessageBox.Ok)
+   msg.exec_()
+   
+def showDialogNorm():
+   msg = QMessageBox()
+   msg.setIcon(QMessageBox.Information)
+
+   msg.setText("With the 2 vertical cursor, choose an area where the software will\
+   integrate and normalize the spectrum from. This is intended to compensate the\
+   shot to shot intensity fluctuations")
+   msg.setWindowTitle("Reference help")
+   msg.setStandardButtons(QMessageBox.Ok)
+   msg.exec_()
+	
 
 
 
